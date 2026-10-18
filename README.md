@@ -1,0 +1,2 @@
+# Detectiverx
+Open ai 
