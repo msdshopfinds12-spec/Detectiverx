@@ -44,7 +44,7 @@ test("detects mutable workflow actions, missing permissions, and missing lockfil
   assert.ok(report.findings.some((item) => item.title.includes("immutable commit")));
   assert.ok(report.findings.some((item) => item.title.includes("token permissions")));
   assert.ok(report.findings.some((item) => item.title.includes("lockfile")));
-  await addFile(root, ".github/workflows/deploy.yml", "permissions: write-all\\n");
+  await addFile(root, ".github/workflows/deploy.yml", "permissions: write-all");
   const expanded = await auditRepository(root);
   assert.ok(expanded.findings.some((item) => item.title.includes("write-all")));
   assert.equal(report.mode, "read-only-static");
