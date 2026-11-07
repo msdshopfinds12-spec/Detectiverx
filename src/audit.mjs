@@ -148,7 +148,7 @@ function inspectWorkflow(text, path, findings) {
     if (/^\s*permissions\s*:/i.test(line)) hasPermissions = true;
     if (/^\s*write-all\s*$/i.test(line)) writeAll = true;
 
-    const usesMatch = line.match(/^\s*-\s*uses:\s*([^\s#]+)/i);
+    const usesMatch = line.match(/^\s*(?:-\s*)?uses:\s*([^\s#]+)/i);
     if (!usesMatch) continue;
 
     const action = usesMatch[1];
