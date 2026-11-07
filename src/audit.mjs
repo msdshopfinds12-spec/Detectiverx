@@ -281,6 +281,7 @@ export async function auditRepository(rootPath, options = {}) {
   const limits = normalizeLimits(options.limits);
   const findings = [];
   const filePaths = new Set();
+  const packageManifests = [];
   const stats = {
     scannedFiles: 0,
     skippedFiles: 0,
