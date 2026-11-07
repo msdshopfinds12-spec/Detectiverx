@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import test from "node:test";
@@ -44,6 +44,9 @@ test("detects mutable workflow actions, missing permissions, and missing lockfil
   assert.ok(report.findings.some((item) => item.title.includes("immutable commit")));
   assert.ok(report.findings.some((item) => item.title.includes("token permissions")));
   assert.ok(report.findings.some((item) => item.title.includes("lockfile")));
+  await addFile(root, ".github/workflows/deploy.yml", "permissions: write-all\\n");
+  const expanded = await auditRepository(root);
+  assert.ok(expanded.findings.some((item) => item.title.includes("write-all")));
   assert.equal(report.mode, "read-only-static");
 });
 
@@ -83,6 +86,16 @@ test("does not follow symbolic links outside the repository", async (t) => {
   assert.ok(report.stats.skippedFiles >= 1);
 });
 
+
+test("detects private-key headers and allows sanitized environment examples", async (t) => {
+  const root = await makeRepository(t);
+  await addFile(root, "keys/private.txt", "-----BEGIN PRIVATE KEY-----\\nredacted-material\\n");
+  await addFile(root, ".env.example", "API_KEY=your-placeholder-value\\n");
+  const report = await auditRepository(root);
+  assert.ok(report.findings.some((item) => item.title === "Private key material detected"));
+  assert.equal(report.findings.some((item) => item.path === ".env.example"), false);
+  assert.equal(JSON.stringify(report).includes("redacted-material"), false);
+});
 test("accepts a clean manifest when a lockfile and test script exist", async (t) => {
   const root = await makeRepository(t);
   await addFile(
