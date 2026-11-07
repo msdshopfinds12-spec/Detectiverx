@@ -26,7 +26,6 @@ const EXCLUDED_DIRECTORIES = new Set([
 ]);
 
 const SECRET_DIRECTORY_PATTERN = /(^|\/)(?:\.aws|\.azure|\.docker|\.kube|\.ssh|\.terraform|\.vercel|\.config\/(?:gh|gcloud)|secrets?|credentials?|private[_-]?keys?)(?:\/|$)/i;
-  /(^|\/)(?:\.aws|\.azure|\.docker|\.kube|\.ssh|\.terraform|\.vercel|\.config\/(?:gh|gcloud)|secrets?|credentials?)(?:\/|$)/i;
 const SECRET_FILENAME_PATTERNS = [
   /^\.env(?:\.(?!example$|sample$|template$)[^/]+)?$/i,
   /^\.npmrc(?:\.[^/]*)?$/i,
