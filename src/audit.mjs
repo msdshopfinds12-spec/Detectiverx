@@ -25,7 +25,7 @@ const EXCLUDED_DIRECTORIES = new Set([
   "venv",
 ]);
 
-const SECRET_DIRECTORY_PATTERN =
+const SECRET_DIRECTORY_PATTERN = /(^|\/)(?:\.aws|\.azure|\.docker|\.kube|\.ssh|\.terraform|\.vercel|\.config\/(?:gh|gcloud)|secrets?|credentials?|private[_-]?keys?)(?:\/|$)/i;
   /(^|\/)(?:\.aws|\.azure|\.docker|\.kube|\.ssh|\.terraform|\.vercel|\.config\/(?:gh|gcloud)|secrets?|credentials?)(?:\/|$)/i;
 const SECRET_FILENAME_PATTERNS = [
   /^\.env(?:\.(?!example$|sample$|template$)[^/]+)?$/i,
@@ -146,7 +146,7 @@ function inspectWorkflow(text, path, findings) {
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
     if (/^\s*permissions\s*:/i.test(line)) hasPermissions = true;
-    if (/^\s*write-all\s*$/i.test(line)) writeAll = true;
+    if (/^\s*(?:permissions:\s*)?write-all\s*$/i.test(line)) writeAll = true;
 
     const usesMatch = line.match(/^\s*(?:-\s*)?uses:\s*([^\s#]+)/i);
     if (!usesMatch) continue;
@@ -224,7 +224,7 @@ function inspectPackageManifest(text, path, isRoot, filePaths, findings) {
           "Use a reviewed version range and commit the package manager's lockfile.",
       });
     }
-    if (/^(?:git\+|https?:|file:)/i.test(version)) {
+    if (/^(?:git\+|github:|https?:|file:)/i.test(version)) {
       addFinding(findings, {
         severity: "medium",
         path,
