@@ -41,7 +41,7 @@ const SECRET_FILENAME_PATTERNS = [
 const PRIVATE_KEY_PATTERN =
   /-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/i;
 const SECRET_ASSIGNMENT_PATTERN =
-  /^\s*(?:export\s+)?([A-Z0-9_]*(?:API[_-]?KEY|ACCESS[_-]?TOKEN|REFRESH[_-]?TOKEN|CLIENT[_-]?SECRET|PASSWORD|DATABASE_URL|PRIVATE_KEY|AUTH_TOKEN|SECRET))\s*[:=]\s*["']?([^"'\s#]{20,})/i;
+  /^\s*(?:export\s+)?([A-Z0-9_]*(?:API[_-]?KEY|ACCESS[_-]?KEY|SECRET[_-]?KEY|TOKEN|SECRET|PASSWORD|DATABASE_URL|PRIVATE_KEY))\s*[:=]\s*["']?([^"'\s#]{20,})/i;
 
 const SEVERITY_RANK = Object.freeze({
   critical: 0,
