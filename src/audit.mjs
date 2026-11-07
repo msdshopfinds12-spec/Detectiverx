@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { lstat, readFile, readdir } from "node:fs/promises";
+import { constants } from "node:fs";
+import { lstat, open, readdir } from "node:fs/promises";
 import { basename, extname, join, relative, resolve, sep } from "node:path";
 
 const DEFAULT_LIMITS = Object.freeze({
@@ -355,11 +356,22 @@ export async function auditRepository(rootPath, options = {}) {
       }
 
       let buffer;
+      let handle;
       try {
-        buffer = await readFile(absolutePath);
+        const flags = constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0);
+        handle = await open(absolutePath, flags);
+        const openedStat = await handle.stat();
+        if (!openedStat.isFile() || openedStat.size > limits.maxFileBytes) {
+          stats.skippedFiles += 1;
+          stats.limitReached = openedStat.size > limits.maxFileBytes;
+          continue;
+        }
+        buffer = await handle.readFile();
       } catch {
         stats.skippedFiles += 1;
         continue;
+      } finally {
+        await handle?.close().catch(() => {});
       }
 
       stats.totalBytes += buffer.length;
@@ -382,18 +394,21 @@ export async function auditRepository(rootPath, options = {}) {
       }
 
       if (fileName === "package.json") {
-        inspectPackageManifest(
-          text,
-          relativePath,
-          relativePath === "package.json",
-          filePaths,
-          findings,
-        );
+        packageManifests.push({ path: relativePath, text });
       }
     }
   }
 
   await walk(root, 0);
+  for (const manifest of packageManifests) {
+    inspectPackageManifest(
+      manifest.text,
+      manifest.path,
+      manifest.path === "package.json",
+      filePaths,
+      findings,
+    );
+  }
 
   if (stats.limitReached) {
     addFinding(findings, {
